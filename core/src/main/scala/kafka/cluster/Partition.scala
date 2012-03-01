@@ -17,41 +17,14 @@
 
 package kafka.cluster
 
-object Partition {
-  def parse(s: String): Partition = {
-    val pieces = s.split("-")
-    if(pieces.length != 2)
-      throw new IllegalArgumentException("Expected name in the form x-y.")
-    new Partition(pieces(0).toInt, pieces(1).toInt)
-  }
-}
+case class Partition(val brokerId: Int, val partId: Int, val topic: String = "") extends Ordered[Partition] {
 
-class Partition(val brokerId: Int, val partId: Int) extends Ordered[Partition] {
-
-  def this(name: String) = {
-    this(1, 1)
-  }
-  
-  def name = brokerId + "-" + partId
-  
-  override def toString(): String = name
+  def name = partId
 
   def compare(that: Partition) =
-    if (this.brokerId == that.brokerId)
+    if (this.topic == that.topic)
       this.partId - that.partId
     else
-      this.brokerId - that.brokerId
-
-  override def equals(other: Any): Boolean = {
-    other match {
-      case that: Partition =>
-        (that canEqual this) && brokerId == that.brokerId && partId == that.partId
-      case _ => false
-    }
-  }
-
-  def canEqual(other: Any): Boolean = other.isInstanceOf[Partition]
-
-  override def hashCode: Int = 31 * (17 + brokerId) + partId
+      this.topic.compareTo(that.topic)
 
 }
