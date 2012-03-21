@@ -16,14 +16,12 @@
  */
 package kafka.cluster
 
-case class Partition(brokerId: Int, partId: Int, topic: String = "") extends Ordered[Partition] {
-
-  def name = partId
-
-  def compare(that: Partition) =
-    if (this.topic == that.topic)
-      this.partId - that.partId
-    else
-      this.topic.compareTo(that.topic)
-
-}
+/**
+ * Data structure that represents a topic partition. The leader maintains the AR, ISR, CUR, RAR
+ * TODO: Commit queue to be added as part of KAFKA-46. Add AR, ISR, CUR, RAR state maintenance as part of KAFKA-302
+ */
+case class Partition(topic: String, val partId: Int, var leader: Option[Replica] = None,
+                     assignedReplicas: Set[Replica] = Set.empty[Replica],
+                     inSyncReplicas: Set[Replica] = Set.empty[Replica],
+                     catchUpReplicas: Set[Replica] = Set.empty[Replica],
+                     reassignedReplicas: Set[Replica] = Set.empty[Replica])
