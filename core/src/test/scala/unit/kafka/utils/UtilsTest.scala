@@ -21,6 +21,7 @@ import org.apache.log4j.Logger
 import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 
+
 class UtilsTest extends JUnitSuite {
   
   private val logger = Logger.getLogger(classOf[UtilsTest]) 
@@ -29,5 +30,5 @@ class UtilsTest extends JUnitSuite {
   def testSwallow() {
     Utils.swallow(logger.info, throw new IllegalStateException("test"))
   }
-  
+
 }
