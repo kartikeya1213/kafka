@@ -36,7 +36,7 @@ class LogStats(val log: Log) extends LogStatsMBean {
   
   def getNumberOfSegments: Int = log.numberOfSegments
   
-  def getCurrentOffset: Long = log.getHighwaterMark
+  def getCurrentOffset: Long = log.highwaterMark
   
   def getNumAppendedMessages: Long = numCumulatedMessages.get
 
