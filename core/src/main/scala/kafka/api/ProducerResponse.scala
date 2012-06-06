@@ -18,16 +18,14 @@
 package kafka.api
 
 import java.nio.ByteBuffer
-import java.nio.channels.GatheringByteChannel
 import kafka.common.ErrorMapping
-import kafka.network.Send
+
 
 object ProducerResponse {
-  val CurrentVersion = 1.shortValue()
-
   def readFrom(buffer: ByteBuffer): ProducerResponse = {
     val versionId = buffer.getShort
     val correlationId = buffer.getInt
+    val errorCode = buffer.getShort
     val errorsSize = buffer.getInt
     val errors = new Array[Short](errorsSize)
     for( i <- 0 until errorsSize) {
@@ -38,64 +36,26 @@ object ProducerResponse {
     for( i <- 0 until offsetsSize) {
       offsets(i) = buffer.getLong
     }
-    new ProducerResponse(versionId, correlationId, errors, offsets)
+    new ProducerResponse(versionId, correlationId, errors, offsets, errorCode)
   }
-
-  def serializeResponse(producerResponse: ProducerResponse): ByteBuffer = {
-    val buffer = ByteBuffer.allocate(producerResponse.sizeInBytes)
-    producerResponse.writeTo(buffer)
-    buffer.rewind()
-    buffer
-  }
-
-  def deserializeResponse(buffer: ByteBuffer): ProducerResponse = readFrom(buffer)
-
 }
 
-case class ProducerResponse(versionId: Short, correlationId: Int, errors: Array[Short], offsets: Array[Long]) {
-  val sizeInBytes = 2 + 4 + (4 + 2 * errors.length) + (4 + 8 * offsets.length)
+case class ProducerResponse(versionId: Short,  correlationId: Int, errors: Array[Short],
+                            offsets: Array[Long], errorCode: Short = ErrorMapping.NoError) extends RequestOrResponse{
+  val sizeInBytes = 2 + 2 + 4 + (4 + 2 * errors.length) + (4 + 8 * offsets.length)
 
   def writeTo(buffer: ByteBuffer) {
-    /* version */
+    /* version id */
     buffer.putShort(versionId)
     /* correlation id */
     buffer.putInt(correlationId)
+    /* error code */
+    buffer.putShort(errorCode)
     /* errors */
     buffer.putInt(errors.length)
     errors.foreach(buffer.putShort(_))
     /* offsets */
     buffer.putInt(offsets.length)
     offsets.foreach(buffer.putLong(_))
-  }
-}
-
-class ProducerResponseSend(val producerResponse: ProducerResponse,
-                           val error: Int = ErrorMapping.NoError) extends Send {
-  private val header = ByteBuffer.allocate(6)
-  header.putInt(producerResponse.sizeInBytes + 2)
-  header.putShort(error.toShort)
-  header.rewind()
-
-  val responseContent = ProducerResponse.serializeResponse(producerResponse)
-
-  var complete = false
-
-  def writeTo(channel: GatheringByteChannel):Int = {
-    expectIncomplete()
-    var written = 0
-    if(header.hasRemaining)
-      written += channel.write(header)
-
-    trace("Wrote %d bytes for header".format(written))
-
-    if(!header.hasRemaining && responseContent.hasRemaining)
-        written += channel.write(responseContent)
-
-    trace("Wrote %d bytes for header, errors and offsets".format(written))
-
-    if(!header.hasRemaining && !responseContent.hasRemaining)
-      complete = true
-
-    written
   }
 }
