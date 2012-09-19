@@ -17,15 +17,7 @@
 
 package kafka.javaapi
 
-import kafka.api.PartitionData
-import kafka.common.TopicAndPartition
-
-
-class FetchResponse( val versionId: Short,
-                     val correlationId: Int,
-                     private val data: Map[TopicAndPartition, PartitionData] ) {
-
-  private val underlying = kafka.api.FetchResponse(versionId, correlationId, data)
+class FetchResponse(private val underlying: kafka.api.FetchResponse) {
 
   def messageSet(topic: String, partition: Int): kafka.javaapi.message.ByteBufferMessageSet = {
     import Implicits._
