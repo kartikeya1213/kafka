@@ -38,11 +38,6 @@ class OffsetRequest(requestInfo: java.util.Map[TopicAndPartition, PartitionOffse
   }
 
 
-  def writeTo(buffer: ByteBuffer) { underlying.writeTo(buffer) }
-
-
-  def sizeInBytes = underlying.sizeInBytes
-
 
   override def toString = underlying.toString
 
