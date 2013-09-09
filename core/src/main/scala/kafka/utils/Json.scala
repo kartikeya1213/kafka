@@ -32,7 +32,7 @@ object Json extends Logging {
       try {
         JSON.parseFull(input)
       } catch {
-        case t =>
+        case t: Throwable =>
           throw new KafkaException("Can't parse json string: %s".format(input), t)
       }
     }
