@@ -20,7 +20,7 @@ package kafka.producer
 
 import kafka.utils._
 
-private class DefaultPartitioner(props: VerifiableProperties = null) extends Partitioner {
+class DefaultPartitioner(props: VerifiableProperties = null) extends Partitioner {
   private val random = new java.util.Random
   
   def partition(key: Any, numPartitions: Int): Int = {
