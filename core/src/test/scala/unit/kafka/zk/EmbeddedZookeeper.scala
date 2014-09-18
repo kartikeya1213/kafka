@@ -18,20 +18,19 @@
 package kafka.zk
 
 import org.apache.zookeeper.server.ZooKeeperServer
-import org.apache.zookeeper.server.NIOServerCnxn
 import org.apache.zookeeper.server.NIOServerCnxnFactory
 import kafka.utils.TestUtils
 import java.net.InetSocketAddress
 import kafka.utils.Utils
+import org.apache.kafka.common.utils.Utils.getPort
 
 class EmbeddedZookeeper(val connectString: String) {
   val snapshotDir = TestUtils.tempDir()
   val logDir = TestUtils.tempDir()
   val tickTime = 500
   val zookeeper = new ZooKeeperServer(snapshotDir, logDir, tickTime)
-  val port = connectString.split(":")(1).toInt
   val factory = new NIOServerCnxnFactory()
-  factory.configure(new InetSocketAddress("127.0.0.1", port),0)
+  factory.configure(new InetSocketAddress("127.0.0.1", getPort(connectString)), 0)
   factory.startup(zookeeper)
 
   def shutdown() {
