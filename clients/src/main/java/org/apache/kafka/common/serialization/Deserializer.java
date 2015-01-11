@@ -29,7 +29,7 @@ public interface Deserializer<T> {
      * @param isKey whether is for key or value
      */
     public void configure(Map<String, ?> configs, boolean isKey);
-
+    
     /**
      *
      * @param topic topic associated with the data
