@@ -23,20 +23,8 @@ package org.apache.kafka.common.errors;
 public class NotEnoughReplicasAfterAppendException extends RetriableException {
     private static final long serialVersionUID = 1L;
 
-    public NotEnoughReplicasAfterAppendException() {
-        super();
-    }
-
-    public NotEnoughReplicasAfterAppendException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
     public NotEnoughReplicasAfterAppendException(String message) {
         super(message);
-    }
-
-    public NotEnoughReplicasAfterAppendException(Throwable cause) {
-        super(cause);
     }
 
 }
