@@ -22,9 +22,9 @@ import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 
-public class KTableSource<K, V> extends KTableProcessorSupplier<K, V, V> {
+public class KTableSource<K, V> implements KTableProcessorSupplier<K, V, V> {
 
-    private final String topic;
+    public final String topic;
 
     private boolean materialized = false;
 
@@ -46,7 +46,7 @@ public class KTableSource<K, V> extends KTableProcessorSupplier<K, V, V> {
     }
 
     @Override
-    public KTableValueGetterSupplier<K, V> view(KTableValueGetterSupplier<K, V> parentValueGetterSupplier) {
+    public KTableValueGetterSupplier<K, V> view() {
         throw new IllegalStateException("a view cannot be define on the ktable source");
     }
 
