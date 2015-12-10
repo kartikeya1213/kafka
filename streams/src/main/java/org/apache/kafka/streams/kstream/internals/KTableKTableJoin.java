@@ -100,14 +100,17 @@ class KTableKTableJoin<K, V, V1, V2> implements KTableProcessorSupplier<K, V1, V
 
         @Override
         public V get(K key) {
+            V newValue = null;
             V1 value1 = valueGetter1.get(key);
 
             if (value1 != null) {
                 V2 value2 = valueGetter2.get(key);
-                return joiner.apply(value1, value2);
-            } else {
-                return null;
+
+                if (value2 != null)
+                    newValue = joiner.apply(value1, value2);
             }
+
+            return newValue;
         }
 
     }
