@@ -47,7 +47,7 @@ public class KTableAggregateTest {
 
             @Override
             public String initialValue() {
-                return "";
+                return "0";
             }
 
             @Override
@@ -106,14 +106,14 @@ public class KTableAggregateTest {
             driver.process(topic1, "C", "8");
 
             assertEquals(Utils.mkList(
-                    "A:+1",
-                    "B:+2",
-                    "A:+1+3", "A:+1+3-1",
-                    "B:+2+4", "B:+2+4-2",
-                    "C:+5",
-                    "D:+6",
-                    "B:+2+4-2+7", "B:+2+4-2+7-4",
-                    "C:+5+8", "C:+5+8-5"), proc2.processed);
+                    "A:0+1",
+                    "B:0+2",
+                    "A:0+1+3", "A:0+1+3-1",
+                    "B:0+2+4", "B:0+2+4-2",
+                    "C:0+5",
+                    "D:0+6",
+                    "B:0+2+4-2+7", "B:0+2+4-2+7-4",
+                    "C:0+5+8", "C:0+5+8-5"), proc2.processed);
 
         } finally {
             Utils.delete(baseDir);
