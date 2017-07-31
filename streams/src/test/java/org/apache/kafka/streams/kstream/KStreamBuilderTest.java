@@ -49,6 +49,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
+@SuppressWarnings("deprecation")
 public class KStreamBuilderTest {
 
     private static final String APP_ID = "app-id";
@@ -92,7 +93,7 @@ public class KStreamBuilderTest {
 
 
     @Test
-    public void shouldNotTryProcessingFromSinkTopic() {
+    public void shouldProcessFromSinkTopic() {
         final KStream<String, String> source = builder.stream("topic-source");
         source.to("topic-sink");
 
@@ -110,7 +111,7 @@ public class KStreamBuilderTest {
     }
 
     @Test
-    public void shouldTryProcessingFromThoughTopic() {
+    public void shouldProcessViaThroughTopic() {
         final KStream<String, String> source = builder.stream("topic-source");
         final KStream<String, String> through = source.through("topic-sink");
 
@@ -310,13 +311,13 @@ public class KStreamBuilderTest {
         final KStream<String, String> mapped = playEvents.map(MockKeyValueMapper.<String, String>SelectValueKeyValueMapper());
         mapped.leftJoin(table, MockValueJoiner.TOSTRING_JOINER).groupByKey().count("count");
         assertEquals(Collections.singletonList("table-topic"), builder.stateStoreNameToSourceTopics().get("table-store"));
-        assertEquals(Collections.singletonList(APP_ID + "-KSTREAM-MAP-0000000003-repartition"), builder.stateStoreNameToSourceTopics().get("count"));
+        assertEquals(Collections.singletonList(APP_ID + "-KSTREAM-MAP-0000000000-repartition"), builder.stateStoreNameToSourceTopics().get("count"));
     }
 
     @Test
     public void shouldAddTopicToEarliestAutoOffsetResetList() {
         final String topicName = "topic-1";
-        
+
         builder.stream(TopologyBuilder.AutoOffsetReset.EARLIEST, topicName);
 
         assertTrue(builder.earliestResetTopicsPattern().matcher(topicName).matches());
