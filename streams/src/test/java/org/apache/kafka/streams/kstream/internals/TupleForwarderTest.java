@@ -49,16 +49,25 @@ public class TupleForwarderTest {
 
     @Test
     public void shouldForwardRecordsIfWrappedStateStoreDoesNotCache() {
+        shouldForwardRecordsIfWrappedStateStoreDoesNotCache(false);
+        shouldForwardRecordsIfWrappedStateStoreDoesNotCache(true);
+    }
+
+    private void shouldForwardRecordsIfWrappedStateStoreDoesNotCache(final boolean sendOldValues) {
         final WrappedStateStore<StateStore, String, String> store = mock(WrappedStateStore.class);
         final ProcessorContext context = mock(ProcessorContext.class);
 
-        expect(store.setFlushListener(null, false)).andReturn(false);
-        context.forward("key", new Change<>("value", "oldValue"));
+        expect(store.setFlushListener(null, sendOldValues)).andReturn(false);
+        if (sendOldValues) {
+            context.forward("key", new Change<>("newValue",  "oldValue"));
+        } else {
+            context.forward("key", new Change<>("newValue", null));
+        }
         expectLastCall();
         replay(store, context);
 
-        new TupleForwarder<>(store, context, null, false)
-            .maybeForward("key", "value", "oldValue");
+        new TupleForwarder<>(store, context, null, sendOldValues)
+            .maybeForward("key", "newValue", "oldValue");
 
         verify(store, context);
     }
@@ -72,7 +81,7 @@ public class TupleForwarderTest {
         replay(store, context);
 
         new TupleForwarder<>(store, context, null, false)
-            .maybeForward("key", "value", "oldValue");
+            .maybeForward("key", "newValue", "oldValue");
 
         verify(store, context);
     }
