@@ -30,8 +30,13 @@ public class ProcessExitingFaultHandler implements FaultHandler {
     private static final Logger log = LoggerFactory.getLogger(ProcessExitingFaultHandler.class);
 
     @Override
-    public void handleFault(String failureMessage, Throwable cause) {
-        FaultHandler.logFailureMessage(log, failureMessage, cause);
+    public RuntimeException handleFault(String failureMessage, Throwable cause) {
+        if (cause == null) {
+            log.error("Encountered fatal fault: {}", failureMessage);
+        } else {
+            log.error("Encountered fatal fault: {}", failureMessage, cause);
+        }
         Exit.exit(1);
+        return null;
     }
 }
