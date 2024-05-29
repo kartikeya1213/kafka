@@ -26,12 +26,8 @@
     { "name":  "Topology", "type": "[]Subtopology", "versions": "0+",
       "about": "The sub-topologies of the streams application.",
       "fields": [
-        // We are using strings here, to avoid fixing a structure on task IDs which will
-        // allow introducing stable naming for subtopologies in the future.
         { "name": "Subtopology", "type": "string", "versions": "0+",
-          "about": "String to uniquely the sub-topology. Deterministically generated from the topology" },
-        { "name": "Partitions", "type": "int32", "versions": "0+",
-          "about": "The number of partitions expected for all source topics and changelog topics." },
+          "about": "String to uniquely identify the subtopology." },
         { "name": "SourceTopics", "type": "[]string", "versions": "0+",
           "about": "The topics the topology reads from." },
         { "name": "SinkTopics", "type": "[]string", "versions": "0+",
