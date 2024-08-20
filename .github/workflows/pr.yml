@@ -16,12 +16,14 @@
 name: Pull Requests
 
 on:
-  push:
-    branches: 'gh-*'
-
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: 'gh-*'
+    branches:
+      - 'trunk'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
@@ -29,36 +31,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [8, 21]
+        java: [ 8, 11, 17, 21 ]
     name: Compile and Check Java ${{ matrix.java }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ matrix.java }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        env:
-          GRADLE_BUILD_ACTION_CACHE_DEBUG_ENABLED: true
+        uses: ./.github/actions/setup-gradle
         with:
-          gradle-version: wrapper
+          java-version: ${{ matrix.java }}
+          gradle-cache-read-only: true
           develocity-access-key: ${{ secrets.GE_ACCESS_TOKEN }}
-          # Only write to the cache from trunk
-          #cache-read-only: ${{ github.ref != 'refs/heads/trunk' }}
-          cache-read-only: false
-          # Cache downloaded JDKs in addition to the default directories.
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-          cache-cleanup: on-success
-          cache-overwrite-existing: true
       - name: Compile and validate
+        # Publish build scans for now. This will only work on PRs from apache/kafka, not public forks.
         run: ./gradlew --build-cache --info --scan check -x test
 
   test:
@@ -68,35 +55,22 @@ jobs:
       fail-fast: false
       matrix:
         java: [ 11, 17 ]
+    if: contains(github.head_ref, 'gh-')  # For now, only run tests on "gh-*" PRs
     name: JUnit tests Java ${{ matrix.java }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ matrix.java }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        env:
-          GRADLE_BUILD_ACTION_CACHE_DEBUG_ENABLED: true
+        uses: ./.github/actions/setup-gradle
         with:
-          gradle-version: wrapper
+          java-version: ${{ matrix.java }}
+          gradle-cache-read-only: true
           develocity-access-key: ${{ secrets.GE_ACCESS_TOKEN }}
-          # Only write to the cache from trunk
-          #cache-read-only: ${{ github.ref != 'refs/heads/trunk' }}
-          cache-read-only: false
-          # Cache downloaded JDKs in addition to the default directories.
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-          cache-cleanup: on-success
-          cache-overwrite-existing: true
       - name: Test
+        # Publish build scans for now. This will only work on PRs from apache/kafka, not public forks.
+        timeout-minutes: 180  # 3 hours
         run: |
           ./gradlew --build-cache --scan --continue \
           -PtestLoggingEvents=started,passed,skipped,failed \
